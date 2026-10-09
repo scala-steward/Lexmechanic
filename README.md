@@ -45,5 +45,5 @@ Lexmechanics are known for processing information with computer-like speed and a
 ---
 
 <p align="center">
-  <img src="art/lexmechanic1.png" alt="Lexmechanic">
+  <img src="art/lexmechanic1.jpg" alt="Lexmechanic">
 </p>
