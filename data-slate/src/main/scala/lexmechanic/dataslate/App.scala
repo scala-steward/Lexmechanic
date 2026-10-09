@@ -66,7 +66,7 @@ object App:
   )
 
   private def header = headerTag(
-    div(cls := "title", "Lexmechanic"),
+    div(cls := "title", img(src := "/emblem.svg", alt := ""), "Lexmechanic"),
     div(
       cls := "status",
       dataAttr("state") <-- status.map(_.toString.toLowerCase),
@@ -87,8 +87,7 @@ object App:
       onClick(_.sample(hotkey)) --> { h => post(if h.exists(_.learning) then "/hotkey/cancel" else "/hotkey/learn") }
     ),
     button(
-      "EN",
-      aria.pressed <-- showEnglish.signal.map(_.toString),
+      text <-- showEnglish.signal.map(if _ then "Hide original" else "Show original"),
       onClick --> { _ => showEnglish.update(!_) }
     ),
     button(

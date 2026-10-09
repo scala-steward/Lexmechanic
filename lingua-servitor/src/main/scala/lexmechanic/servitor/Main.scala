@@ -27,7 +27,12 @@ private def run(): Unit =
   val app = Daemon(xenolinguist(config), config)
   Log.info(s"Config: ${Config.file}")
   Hotkey.listen(app.onKey, app.hotkeyProblem)
-  HttpServer.serve(config.port)(app.route)
+  HttpServer.serve(config.port, openUi(config.openCommand))(app.route)
+
+private def openUi(command: List[String])(url: String): Unit =
+  if command.nonEmpty then
+    failureOf(ProcessBuilder(command.map(_.replace("{url}", url))*).inheritIO().start())
+      .foreach(e => Log.info(s"Could not open the UI: $e"))
 
 private def xenolinguist(config: Config): Xenolinguist =
   val provider = config.provider

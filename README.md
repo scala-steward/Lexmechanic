@@ -44,13 +44,13 @@ Lexmechanics are known for processing information with computer-like speed and a
 
 ## Usage
 
-Lexmechanic is a small daemon. When you press a mouse side button, it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into Polish, and shows the result in a local web page. Open that page on the Steam Deck's built-in screen.
+Lexmechanic is a small daemon. When you press a mouse side button, it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into Polish, and shows the result in a local web page, which it opens on start. Keep that page on the Steam Deck's built-in screen.
 
 ```sh
 export GEMINI_API_KEY=...       # free key from https://aistudio.google.com/apikey
 sbt linguaServitor/nativeLink  # sbt 2.x; also builds the UI and embeds it
 bin=target/out/native0.5/scala-3.9.0/lingua-servitor/lexmechanic
-$bin                           # daemon; UI at http://127.0.0.1:7040
+$bin                           # daemon; opens the UI at http://127.0.0.1:7040
 $bin trigger                   # translate now (e.g. from a KDE shortcut)
 $bin translate shot.png        # one-off, prints to the terminal
 ```
@@ -79,6 +79,7 @@ Settings are in `~/.config/lexmechanic/config.json`, which is created on first r
 | `captain` | `male` | gender of your Rogue Trader, used for Polish grammar |
 | `port` | `7040` | |
 | `captureCommand` | `spectacle` (Linux) / `screencapture` (macOS) | command as a JSON array of arguments, e.g. `["spectacle", "-b", "-n", "-f", "-o", "{file}"]`; `{file}` becomes the PNG output path |
+| `openCommand` | `xdg-open` (Linux) / `open` (macOS) | opens the UI once the daemon starts; `{url}` becomes its address, `[]` turns it off |
 | `region` | none | set by Calibrate |
 | `hotkey` | `276` | evdev key code, set from the UI; `275` = mouse 4 ("back"), `276` = mouse 5 ("forward") |
 
@@ -99,8 +100,9 @@ Providers:
 - **Build:** the binary must be built on Linux. Use a distrobox container on the Deck
   (`distrobox create -i archlinux`, then install `clang`, `sbt` and `curl` inside it).
 - **API key:** put it in `apiKeys`. A daemon started by KDE autostart does not see keys exported in your shell profile.
-- **Display:** open the UI in a browser on the built-in screen (for example `firefox --kiosk http://127.0.0.1:7040`)
-  and pin it there with a KDE window rule.
+- **Display:** to open the UI full-screen, set `openCommand` to
+  `["flatpak", "run", "org.mozilla.firefox", "--kiosk", "{url}"]`, then pin the window to the built-in screen with a
+  KDE window rule.
 
 ---
 

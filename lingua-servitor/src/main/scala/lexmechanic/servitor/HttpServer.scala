@@ -11,11 +11,13 @@ object HttpServer:
   private val MaxBody = 1 << 20
   private val MaxHead = 1 << 16
 
-  def serve(port: Int)(handler: Request => Response): Unit =
+  def serve(port: Int, onListening: String => Unit)(handler: Request => Response): Unit =
     val server = ServerSocket()
     server.setReuseAddress(true)
     server.bind(InetSocketAddress(InetAddress.getLoopbackAddress, port))
-    Log.info(s"UI: http://127.0.0.1:$port")
+    val url = s"http://127.0.0.1:$port"
+    Log.info(s"UI: $url")
+    onListening(url)
     while true do
       val socket = server.accept()
       Background.run("http")(handle(socket, handler))

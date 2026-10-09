@@ -16,6 +16,7 @@ final case class Config(
     captain: Gender = Gender.Male,
     port: Int = 7040,
     captureCommand: List[String] = Config.defaultCaptureCommand,
+    openCommand: List[String] = Config.defaultOpenCommand,
     region: Option[Region] = None,
     hotkey: Option[Int] = Some(EvdevKeys.BtnExtra)
 ) derives ConfiguredCodec
@@ -24,6 +25,8 @@ object Config:
   private val defaultCaptureCommand =
     if LinktimeInfo.isMac then List("screencapture", "-x", "-t", "png", "{file}")
     else List("spectacle", "--background", "--nonotify", "--fullscreen", "--output", "{file}")
+
+  private val defaultOpenCommand = List(if LinktimeInfo.isMac then "open" else "xdg-open", "{url}")
 
   private def xdgDir(variable: String, fallback: String): Path =
     sys.env.get(variable).map(Paths.get(_)).getOrElse(Paths.get(Properties.userHome, fallback)).resolve("lexmechanic")

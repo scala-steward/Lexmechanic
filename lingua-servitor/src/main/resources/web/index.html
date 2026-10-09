@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lexmechanic</title>
+<link rel="icon" href="/emblem.svg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
   :root {
@@ -28,7 +29,6 @@
     padding: 8px 14px; cursor: pointer; touch-action: manipulation;
   }
   button:hover, button:focus-visible { border-color: var(--brass); outline: none; }
-  button[aria-pressed="true"] { background: var(--brass); color: var(--bg); }
   button:disabled { opacity: .4; cursor: default; }
   .hotkey-label { font: 500 12px var(--display); letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
   button[data-learning="true"] { border-color: var(--brass); animation: pulse 1s ease-in-out infinite; }
@@ -37,7 +37,8 @@
     display: flex; align-items: center; gap: 12px; padding: 10px 16px;
     border-bottom: 1px solid var(--line); background: var(--panel);
   }
-  .title { font: 700 17px var(--display); letter-spacing: .2em; color: var(--brass); margin-right: auto; }
+  .title { display: flex; align-items: center; gap: 10px; font: 700 17px var(--display); letter-spacing: .2em; color: var(--brass); margin-right: auto; }
+  .title img { width: 32px; height: 32px; }
   .status { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); margin-right: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
   .status[data-state="busy"] .dot { background: var(--brass); animation: pulse 1s ease-in-out infinite; }

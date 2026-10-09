@@ -1,10 +1,14 @@
 package lexmechanic.servitor
 
 object Resources:
-  lazy val indexHtml: Array[Byte] = load("/web/index.html")
-  lazy val mainJs: Array[Byte] = load("/web/main.js")
+  lazy val web: Map[String, Response] = Map(
+    "/" -> asset("index.html", "text/html; charset=utf-8"),
+    "/main.js" -> asset("main.js", "text/javascript; charset=utf-8"),
+    "/emblem.svg" -> asset("emblem.svg", "image/svg+xml")
+  )
 
-  private def load(path: String): Array[Byte] =
+  private def asset(name: String, contentType: String): Response =
+    val path = s"/web/$name"
     val stream = Option(getClass.getResourceAsStream(path)).getOrElse(throw RuntimeException(s"Missing resource $path"))
-    try stream.readAllBytes()
+    try Response(200, contentType, stream.readAllBytes())
     finally stream.close()

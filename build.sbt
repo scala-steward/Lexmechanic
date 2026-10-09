@@ -35,10 +35,13 @@ lazy val linguaServitor = project
       "com.softwaremill.sttp.ai" %% "openai" % "0.11.4"
     ),
     Compile / resourceGenerators += Def.task {
-      val linked = (dataSlate / Compile / fullLinkJSOutput).value / "main.js"
-      val embedded = (Compile / resourceManaged).value / "web" / "main.js"
-      IO.copyFile(linked, embedded)
-      Seq(embedded)
+      val web = (Compile / resourceManaged).value / "web"
+      IO.copy(
+        Seq(
+          (dataSlate / Compile / fullLinkJSOutput).value / "main.js" -> web / "main.js",
+          (ThisBuild / baseDirectory).value / "art" / "emblem.svg" -> web / "emblem.svg"
+        )
+      ).toSeq
     }.taskValue,
     nativeConfig ~= {
       _.withBaseName("lexmechanic")

@@ -92,9 +92,7 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
     currentState(failure.fold(200)(_._1))
 
   private def endpoint(request: Request): Response = (request.method, request.path) match
-    case ("GET", "/")        => Response(200, "text/html; charset=utf-8", Resources.indexHtml)
-    case ("GET", "/main.js") => Response(200, "text/javascript; charset=utf-8", Resources.mainJs)
-    case ("GET", "/state")   => currentState()
+    case ("GET", "/state")                                       => currentState()
     case ("GET", "/screenshot") if Files.exists(calibrationShot) =>
       Response(200, "image/png", Files.readAllBytes(calibrationShot))
     case ("POST", "/capture")   => currentState(if trigger() then 200 else 409)
@@ -115,4 +113,5 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
     case ("POST", "/hotkey/cancel") =>
       synchronized { learning = false }
       currentState()
-    case _ => Response.text(404, "Not found")
+    case ("GET", path) if Resources.web.contains(path) => Resources.web(path)
+    case _                                             => Response.text(404, "Not found")
