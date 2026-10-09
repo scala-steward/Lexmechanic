@@ -39,6 +39,7 @@ lazy val linguaServitor = project
       IO.copy(
         Seq(
           (dataSlate / Compile / fullLinkJSOutput).value / "main.js" -> web / "main.js",
+          (dataSlate / sourceDirectory).value / "main" / "web" / "index.html" -> web / "index.html",
           (ThisBuild / baseDirectory).value / "art" / "emblem.svg" -> web / "emblem.svg"
         )
       ).toSeq
