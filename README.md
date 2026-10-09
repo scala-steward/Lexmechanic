@@ -98,7 +98,7 @@ Providers:
   GeForce NOW has focus. Your user needs to be in the `input` group: `sudo usermod -aG input deck`, then log in again.
   Without that, bind `lexmechanic trigger` to a KDE custom shortcut instead.
 - **Build:** the binary must be built on Linux. Use a distrobox container on the Deck
-  (`distrobox create -i archlinux`, then install `clang`, `sbt` and `curl` inside it).
+  (`distrobox create -i archlinux`, then install `clang`, `which`, `sbt` and `curl` inside it; Scala Native finds `clang` through `which`).
 - **API key:** put it in `apiKeys`. A daemon started by KDE autostart does not see keys exported in your shell profile.
 - **Display:** to open the UI full-screen, set `openCommand` to
   `["flatpak", "run", "org.mozilla.firefox", "--kiosk", "{url}"]`, then pin the window to the built-in screen with a
