@@ -1,0 +1,45 @@
+package lexmechanic.servitor
+
+import io.circe.derivation.ConfiguredCodec
+import io.circe.parser.decode
+import io.circe.syntax.*
+import lexmechanic.noosphere.{*, given}
+
+import java.nio.file.{Files, Path, Paths}
+import scala.scalanative.meta.LinktimeInfo
+import scala.util.Properties
+
+final case class Config(
+    provider: Provider = Provider.Gemini,
+    model: Option[String] = None,
+    apiKeys: Map[String, String] = Map.empty,
+    captain: Gender = Gender.Male,
+    port: Int = 7040,
+    captureCommand: List[String] = Config.defaultCaptureCommand,
+    region: Option[Region] = None,
+    hotkey: Option[Int] = Some(EvdevKeys.BtnExtra)
+) derives ConfiguredCodec
+
+object Config:
+  private val defaultCaptureCommand =
+    if LinktimeInfo.isMac then List("screencapture", "-x", "-t", "png", "{file}")
+    else List("spectacle", "--background", "--nonotify", "--fullscreen", "--output", "{file}")
+
+  private def xdgDir(variable: String, fallback: String): Path =
+    sys.env.get(variable).map(Paths.get(_)).getOrElse(Paths.get(Properties.userHome, fallback)).resolve("lexmechanic")
+
+  val file: Path = xdgDir("XDG_CONFIG_HOME", ".config").resolve("config.json")
+  val cacheDir: Path = xdgDir("XDG_CACHE_HOME", ".cache")
+
+  def load(): Config =
+    if Files.exists(file) then
+      decode[Config](Files.readString(file))
+        .fold(e => throw RuntimeException(s"Invalid $file: ${e.getMessage}"), identity)
+    else
+      val config = Config()
+      save(config)
+      config
+
+  def save(config: Config): Unit =
+    Files.createDirectories(file.getParent)
+    Files.writeString(file, config.asJson.spaces2)

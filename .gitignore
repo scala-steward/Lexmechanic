@@ -5,3 +5,18 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# sbt, Scala Native and Scala.js build output (every module's target/, including project/)
+target/
+project/project/
+.bsp/
+
+# editors and IDEs
+.metals/
+.bloop/
+.cursor/
+.scala-build/
+.vscode/
+.idea/
+project/metals.sbt
+.mcp.json
