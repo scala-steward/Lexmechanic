@@ -34,6 +34,9 @@ trait Messages:
   val pressAButton: String
   val noHotkey: String
   def hotkeyUnavailable(problem: HotkeyProblem): String
+  val instructions: String
+  val instructionsHint: String
+  val restoreDefault: String
 
   val noRegion: String
   val emptyHistory: String

@@ -25,6 +25,10 @@ object Silesian extends Messages:
   val hotkey = "Skrōt"
   val hotkeyLearnHint = "Kliknij, a potym naciś knefel myszy abo klawisz, kerego chcesz używać"
   val hotkeyCancelHint = "Kliknij, coby ôdwołać"
+  val instructions = "Instrukcyje"
+  val instructionsHint =
+    "Dodatkowe wskazōwki dlŏ Plugawyj Inteligyncyje, spamiyntywane, jak wyjdziesz z pola. Szpil, docelowy jynzyk i format ôdpowiedzi sōm zawdy przidŏwane."
+  val restoreDefault = "Prziwrōć wychodne"
   val pressAButton = "Naciś knefel…"
   val noHotkey = "Żŏdyn"
   def hotkeyUnavailable(problem: HotkeyProblem) = problem match

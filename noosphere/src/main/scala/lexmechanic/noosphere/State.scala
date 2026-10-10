@@ -9,6 +9,7 @@ final case class State(
     game: String,
     language: Option[Language],
     interfaceLanguage: Option[String],
+    instructions: String,
     hotkey: HotkeyState,
     history: List[Entry]
 ) derives Codec.AsObject

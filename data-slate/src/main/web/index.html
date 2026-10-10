@@ -28,7 +28,7 @@
     color: var(--brass); background: transparent; border: 1px solid var(--line); border-radius: 3px;
     padding: 8px 14px; cursor: pointer; touch-action: manipulation;
   }
-  input, select {
+  input, select, textarea {
     font: 500 17px/1.2 "EB Garamond", Georgia, serif; color: var(--text); color-scheme: dark;
     background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 7px 12px; min-width: 0;
   }
@@ -37,19 +37,26 @@
     appearance: none; max-width: 280px; text-overflow: ellipsis; cursor: pointer; padding-right: 32px;
     background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23c9a24a' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center / 10px 6px;
   }
-  :is(button, input, select):is(:hover, :focus-visible) { border-color: var(--brass); outline: none; }
-  :is(button, input, select):disabled { opacity: .4; cursor: default; }
+  :is(button, input, select, textarea):is(:hover, :focus-visible) { border-color: var(--brass); outline: none; }
+  :is(button, input, select, textarea):disabled { opacity: .4; cursor: default; }
   option { background: var(--panel); color: var(--text); }
   .switch { display: flex; align-items: center; gap: 10px; border-color: transparent; }
   .track { position: relative; width: 34px; height: 18px; border: 1px solid var(--line); border-radius: 9px; transition: background .15s, border-color .15s; }
   .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
   .switch[aria-checked="true"] .track { border-color: var(--brass); background: color-mix(in srgb, var(--brass) 25%, transparent); }
   .switch[aria-checked="true"] .track::after { transform: translateX(16px); background: var(--brass); }
+  button[aria-expanded="true"] { border-color: var(--brass); }
   button[data-learning="true"] { border-color: var(--brass); animation: pulse 1s ease-in-out infinite; }
 
-  header, .settings { display: flex; align-items: center; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header, .settings, .prompt-editor { border-bottom: 1px solid var(--line); background: var(--panel); }
+  header, .settings { display: flex; align-items: center; }
   header { gap: 12px; padding: 10px 16px; }
   .settings { flex-wrap: wrap; gap: 10px 24px; padding: 8px 16px; }
+  .prompt-editor { display: none; flex-direction: column; gap: 8px; padding: 10px 16px; }
+  .prompt-editor.open { display: flex; }
+  .prompt-editor .hint { font-size: 15px; margin: 0; }
+  .prompt-editor textarea { resize: vertical; line-height: 1.4; }
+  .prompt-editor button { align-self: flex-end; }
   .field { display: flex; align-items: center; gap: 10px; }
   .field.game { flex: 1 1 280px; }
   .field.game input { flex: 1; }

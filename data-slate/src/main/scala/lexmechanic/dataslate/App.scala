@@ -16,7 +16,7 @@ import scala.scalajs.js
 object App:
   private val server = Var(Option.empty[State])
   private val pending = Var(0)
-  private val savedGame = EventBus[String]()
+  private val instructionsOpen = Var(false)
   private val postAnswered = EventBus[Unit]()
   private val showOriginal = WebStorageVar.localStorage("lexmechanic.original", syncOwner = None).bool(default = true)
 
@@ -68,6 +68,17 @@ object App:
 
   private def saveSettings(settings: Settings): Future[Boolean] = post("/settings", settings.asJson.noSpaces)
 
+  // Polls must not clobber unsaved typing, nor a failed poll blank it; a save re-sets it even when the
+  // server's normalized value equals the previous one.
+  private def savedText(read: State => String, settings: String => Settings) =
+    val saved = EventBus[String]()
+    Seq(
+      value <-- EventStream.merge(state.changes.collectSome.map(read).distinct, saved.events),
+      onChange.mapToValue --> { text =>
+        saveSettings(settings(text)).foreach(_ => server.now().foreach(s => saved.emit(read(s))))
+      }
+    )
+
   def main(args: Array[String]): Unit =
     renderOnDomContentLoaded(dom.document.getElementById("app"), view)
 
@@ -82,6 +93,7 @@ object App:
     I18n.messages --> { m => dom.document.documentElement.setAttribute("lang", m.lang) },
     header,
     settings,
+    instructionsEditor,
     mainView,
     Calibration.overlay(state.map(_.flatMap(_.region))),
     child.maybe <-- state.map(_.flatMap(_.error)).splitOption((_, message) => div(cls := "error", text <-- message))
@@ -130,12 +142,7 @@ object App:
         spellCheck := false,
         placeholder <-- t(_.anyGame),
         disabled <-- offline,
-        // Polls must not clobber unsaved typing, nor a failed poll blank it; a save re-sets it even when the
-        // server's trimmed value equals the previous one.
-        value <-- EventStream.merge(state.changes.collectSome.map(_.game).distinct, savedGame.events),
-        onChange.mapToValue --> { game =>
-          saveSettings(Settings(game = Some(game))).foreach(_ => server.now().foreach(s => savedGame.emit(s.game)))
-        }
+        savedText(_.game, game => Settings(game = Some(game)))
       )
     ),
     label(
@@ -178,6 +185,28 @@ object App:
           onChange.mapToValue --> { lang => saveSettings(Settings(interfaceLanguage = Some(lang))) }
         )
       )
+    ),
+    button(
+      text <-- t(_.instructions),
+      aria.expanded <-- instructionsOpen.signal,
+      onClick --> { _ => instructionsOpen.update(!_) }
+    )
+  )
+
+  private def instructionsEditor = div(
+    cls := "prompt-editor",
+    cls("open") <-- instructionsOpen.signal,
+    div(cls := "hint", text <-- t(_.instructionsHint)),
+    textArea(
+      rows := 6,
+      spellCheck := false,
+      disabled <-- offline,
+      savedText(_.instructions, text => Settings(instructions = Some(text)))
+    ),
+    button(
+      text <-- t(_.restoreDefault),
+      disabled <-- state.map(_.forall(_.instructions == Instructions.default)),
+      onClick --> { _ => saveSettings(Settings(instructions = Some(Instructions.default))) }
     )
   )
 

@@ -34,6 +34,7 @@ final class Servitor(xenolinguist: Xenolinguist, initial: Config):
       config.game,
       config.language,
       config.interfaceLanguage,
+      config.activeInstructions,
       HotkeyState(config.hotkey, learning, hotkeyUnavailable),
       history
     )
@@ -135,7 +136,10 @@ final class Servitor(xenolinguist: Xenolinguist, initial: Config):
               c.copy(
                 game = settings.game.fold(c.game)(_.trim),
                 language = settings.language.orElse(c.language),
-                interfaceLanguage = settings.interfaceLanguage.orElse(c.interfaceLanguage)
+                interfaceLanguage = settings.interfaceLanguage.orElse(c.interfaceLanguage),
+                // Text matching the default is stored as unset, so later changes to the default still reach it.
+                instructions =
+                  settings.instructions.fold(c.instructions)(i => Option(i.trim).filter(_ != Instructions.default))
               )
             )
             None

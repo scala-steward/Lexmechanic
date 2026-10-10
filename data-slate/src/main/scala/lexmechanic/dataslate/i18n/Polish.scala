@@ -24,6 +24,10 @@ object Polish extends Messages:
   val hotkey = "Skrót"
   val hotkeyLearnHint = "Kliknij, a potem naciśnij przycisk myszy lub klawisz, którego chcesz używać"
   val hotkeyCancelHint = "Kliknij, aby anulować"
+  val instructions = "Instrukcje"
+  val instructionsHint =
+    "Dodatkowe wskazówki dla Plugawej Inteligencji, zapisywane po wyjściu z pola. Gra, język docelowy i format odpowiedzi są dodawane zawsze."
+  val restoreDefault = "Przywróć domyślne"
   val pressAButton = "Naciśnij przycisk…"
   val noHotkey = "Brak"
   def hotkeyUnavailable(problem: HotkeyProblem) = problem match

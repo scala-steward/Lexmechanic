@@ -18,6 +18,7 @@ final case class Config(
     language: Option[Language] = None,
     interfaceLanguage: Option[String] = None,
     captain: Gender = Gender.Male,
+    instructions: Option[String] = None,
     port: Int = 7040,
     captureCommand: List[String] = Config.defaultCaptureCommand,
     openCommand: List[String] = Config.defaultOpenCommand,
@@ -27,7 +28,9 @@ final case class Config(
   // Unset until the UI saves the browser's language; translations before that need some target.
   def targetLanguage: Language = language.getOrElse(Language.fallback)
 
-  def mandate: Mandate = Mandate(game, targetLanguage, captain)
+  def activeInstructions: String = instructions.getOrElse(Instructions.default)
+
+  def mandate: Mandate = Mandate(game, targetLanguage, captain, activeInstructions)
 
 object Config:
   private val defaultCaptureCommand =

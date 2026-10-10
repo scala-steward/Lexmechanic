@@ -26,6 +26,10 @@ object English extends Messages:
   val pressAButton = "Press a button…"
   val noHotkey = "None"
   def hotkeyUnavailable(problem: HotkeyProblem) = s"Hotkey unavailable: ${problem.description}."
+  val instructions = "Instructions"
+  val instructionsHint =
+    "Extra guidance for the Abominable Intelligence, saved when you leave the box. The game, target language and answer format are always added."
+  val restoreDefault = "Restore default"
 
   val noRegion = "No region calibrated yet - the whole screen is sent. Use Calibrate to select the dialogue window."
   val emptyHistory = "Press the hotkey while a dialogue is on screen."

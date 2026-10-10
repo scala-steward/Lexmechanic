@@ -12,17 +12,17 @@ final class Xenolinguist(voxLink: VoxLink):
 
   private def systemPrompt(mandate: Mandate) =
     val source = if mandate.game.isEmpty then "a video game" else s"the video game ${mandate.game}"
-    s"""You translate dialogue from $source into ${mandate.language.describe}.
-       |You receive a screenshot of the in-game dialogue window. Transcribe the text exactly as shown into `original`,
-       |then put a natural translation into that language, keeping the tone and style of the original, into `translation`.
-       |
-       |- `speaker` is the name shown above the current line, or null if none is visible.
-       |- `text` is the line being spoken; `answers` are the numbered reply options, in on-screen order.
-       |- Keep answer numbering and bracketed tags such as skill checks; translate the tag words.
-       |- Leave the names of characters, places and ships untranslated.
-       |  Use the established terminology of the game's setting in that language where it exists.
-       |- The player character is ${mandate.captain.toString.toLowerCase}.
-       |  If that language marks grammatical gender, use the matching forms whenever the player speaks or is addressed.""".stripMargin
+    val header =
+      s"""You translate dialogue from $source into ${mandate.language.describe}.
+         |You receive a screenshot of the in-game dialogue window. Transcribe the text exactly as shown into `original`,
+         |then put a natural translation into that language, keeping the tone and style of the original, into `translation`.
+         |
+         |- `speaker` is the name shown above the current line, or null if none is visible.
+         |- `text` is the line being spoken; `answers` are the reply options, in on-screen order.""".stripMargin
+    val footer =
+      s"""- The player character is ${mandate.captain.toString.toLowerCase}.
+         |  If that language marks grammatical gender, use the matching forms whenever the player speaks or is addressed.""".stripMargin
+    List(header, mandate.instructions, footer).filter(_.nonEmpty).mkString("\n")
 
   def translate(screenshot: RgbImage, mandate: Mandate): Dialogue =
     // A full-screen shot near the pixel limit can still exceed MaxBytes if it compresses poorly.

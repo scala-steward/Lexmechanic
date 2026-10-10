@@ -69,6 +69,8 @@ The code is split into three sbt modules:
 In the UI, use **Calibrate** once to drag a box over the game's dialogue window. To pick the trigger, click the
 **Hotkey** button and press the mouse button or key you want to use. **Game** and **Translate into** set which game you are
 playing and the language to translate into; the source language is detected automatically.
+**Instructions** opens the part of the Abominable Intelligence prompt you can edit, e.g. to adapt it to another game. The game, the target
+language, the answer format and your character's gender are always added around it.
 
 **Interface** picks the UI's own language, separately from the translation language. UI texts live in
 `data-slate/src/main/scala/lexmechanic/dataslate/i18n/`: one object per language implementing `Messages`. To add one,
@@ -85,6 +87,7 @@ Settings are in `~/.config/lexmechanic/config.json`, which is created on first r
 | `language` | the browser's language | language code to translate into, set from the UI; `en-US` until the UI first opens |
 | `interfaceLanguage` | the browser's language | language of the UI itself, set from the UI; English where there is no UI translation |
 | `captain` | `male` | gender of your player character, for languages with grammatical gender |
+| `instructions` | built in | game-specific guidance for the Abominable Intelligence, set from the UI; **Restore default** removes it |
 | `port` | `7040` | |
 | `captureCommand` | `spectacle` (Linux) / `screencapture` (macOS) | command as a JSON array of arguments, e.g. `["spectacle", "-b", "-n", "-f", "-o", "{file}"]`; `{file}` becomes the PNG output path |
 | `openCommand` | `xdg-open` (Linux) / `open` (macOS) | opens the UI once the daemon starts; `{url}` becomes its address, `[]` turns it off |
