@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,15 +28,27 @@
     color: var(--brass); background: transparent; border: 1px solid var(--line); border-radius: 3px;
     padding: 8px 14px; cursor: pointer; touch-action: manipulation;
   }
-  button:hover, button:focus-visible { border-color: var(--brass); outline: none; }
-  button:disabled { opacity: .4; cursor: default; }
-  .hotkey-label { font: 500 12px var(--display); letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+  input, select {
+    font: 500 17px/1.2 "EB Garamond", Georgia, serif; color: var(--text); color-scheme: dark;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 7px 12px; min-width: 0;
+  }
+  input::placeholder { color: var(--muted); font-style: italic; }
+  select {
+    appearance: none; max-width: 280px; text-overflow: ellipsis; cursor: pointer; padding-right: 32px;
+    background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23c9a24a' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center / 10px 6px;
+  }
+  :is(button, input, select):is(:hover, :focus-visible) { border-color: var(--brass); outline: none; }
+  :is(button, input, select):disabled { opacity: .4; cursor: default; }
+  option { background: var(--panel); color: var(--text); }
   button[data-learning="true"] { border-color: var(--brass); animation: pulse 1s ease-in-out infinite; }
 
-  header {
-    display: flex; align-items: center; gap: 12px; padding: 10px 16px;
-    border-bottom: 1px solid var(--line); background: var(--panel);
-  }
+  header, .settings { display: flex; align-items: center; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header { gap: 12px; padding: 10px 16px; }
+  .settings { flex-wrap: wrap; gap: 10px 24px; padding: 8px 16px; }
+  .field { display: flex; align-items: center; gap: 10px; }
+  .field.game { flex: 1 1 280px; }
+  .field.game input { flex: 1; }
+  .field-label { font: 500 12px var(--display); letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
   .title { display: flex; align-items: center; gap: 10px; font: 700 17px var(--display); letter-spacing: .2em; color: var(--brass); margin-right: auto; }
   .title img { width: 32px; height: 32px; }
   .status { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); margin-right: 8px; }
@@ -54,9 +66,9 @@
 
   .entry { margin-bottom: 28px; }
   .speaker { font: 700 18px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin-bottom: 4px; }
-  .pl { margin: 0; }
-  .en { margin: 4px 0 0; color: var(--muted); font-size: 16px; font-style: italic; }
-  .shell:not(.show-en) .en { display: none; }
+  .translation { margin: 0; }
+  .original { margin: 4px 0 0; color: var(--muted); font-size: 16px; font-style: italic; }
+  .shell:not(.show-original) .original { display: none; }
   ol { list-style: none; margin: 16px 0 0; padding: 0; }
   li { border-left: 2px solid var(--brass); padding: 4px 0 4px 14px; margin-bottom: 10px; font-size: 21px; }
 

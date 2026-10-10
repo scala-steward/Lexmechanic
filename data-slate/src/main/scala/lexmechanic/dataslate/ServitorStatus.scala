@@ -1,7 +1,9 @@
 package lexmechanic.dataslate
 
-enum ServitorStatus(val label: String):
-  case Offline extends ServitorStatus("Daemon offline")
-  case Busy extends ServitorStatus("Cogitating…")
-  case Failed extends ServitorStatus("Error")
-  case Ready extends ServitorStatus("Ready")
+import lexmechanic.dataslate.i18n.Messages
+
+enum ServitorStatus(val label: Messages => String):
+  case Offline extends ServitorStatus(_.statusOffline)
+  case Busy extends ServitorStatus(_.statusBusy)
+  case Failed extends ServitorStatus(_.statusFailed)
+  case Ready extends ServitorStatus(_.statusReady)

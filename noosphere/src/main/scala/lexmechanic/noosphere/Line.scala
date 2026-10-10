@@ -2,4 +2,4 @@ package lexmechanic.noosphere
 
 import io.circe.Codec
 
-final case class Line(english: String, polish: String) derives Codec.AsObject
+final case class Line(original: String, translation: String) derives Codec.AsObject

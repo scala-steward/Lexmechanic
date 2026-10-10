@@ -19,7 +19,7 @@ private val usage =
     case Seq("trigger")         => trigger()
     case Seq("translate", path) =>
       val config = Config.load()
-      println(render(xenolinguist(config).translate(Png.read(Paths.get(path), None), config.captain)))
+      println(render(xenolinguist(config).translate(Png.read(Paths.get(path), None), config)))
     case _ => fail(usage, exitCode = 2)
 
 private def run(): Unit =
@@ -59,6 +59,6 @@ private def fail(message: String, exitCode: Int = 1): Nothing =
   sys.exit(exitCode)
 
 private def render(dialogue: Dialogue): String =
-  val text = List(dialogue.text.polish, s"  (${dialogue.text.english})")
-  val answers = dialogue.answers.flatMap(a => List("", s"  ${a.polish}", s"    (${a.english})"))
+  val text = List(dialogue.text.translation, s"  (${dialogue.text.original})")
+  val answers = dialogue.answers.flatMap(a => List("", s"  ${a.translation}", s"    (${a.original})"))
   (dialogue.speaker.map(_ + ":").toList ++ text ++ answers).mkString("\n")

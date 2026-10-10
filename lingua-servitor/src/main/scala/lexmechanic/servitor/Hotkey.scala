@@ -1,5 +1,7 @@
 package lexmechanic.servitor
 
+import lexmechanic.noosphere.HotkeyProblem
+
 import java.io.{BufferedInputStream, DataInputStream, File, FileInputStream, IOException}
 import java.nio.file.{Files, Path}
 import java.nio.{ByteBuffer, ByteOrder}
@@ -14,22 +16,20 @@ object Hotkey:
   // Mice come and go (USB replug, Bluetooth reconnecting after sleep), so devices are rescanned rather than found once.
   private val RescanMillis = 3000L
 
-  def listen(onPress: Int => Unit, onProblem: Option[String] => Unit): Unit =
+  def listen(onPress: Int => Unit, onProblem: Option[HotkeyProblem] => Unit): Unit =
     val watched = ConcurrentHashMap.newKeySet[String]()
     Background.run("hotkey-scan") {
-      var reported = Option.empty[Option[String]]
+      var reported = Option.empty[Option[HotkeyProblem]]
       while true do
         val devices = Option(File("/dev/input").listFiles()).toList.flatten.filter(_.getName.startsWith("event"))
         val (readable, unreadable) = devices.partition(_.canRead)
         val problem =
-          if devices.isEmpty then
-            Some("No input devices found (evdev is Linux-only) - use Translate or `lexmechanic trigger`.")
+          if devices.isEmpty then Some(HotkeyProblem.NoDevices)
           // Some devices (e.g. Steam's virtual gamepad) are readable without the input group, so check the unreadable ones.
-          else if unreadable.exists(hasKeys) then
-            Some("Input devices with buttons are not readable - run `sudo usermod -aG input $USER` and log in again.")
+          else if unreadable.exists(hasKeys) then Some(HotkeyProblem.NoPermission)
           else None
         if !reported.contains(problem) then
-          Log.info(s"Hotkey: ${problem.getOrElse("listening")}")
+          Log.info(s"Hotkey: ${problem.fold("listening")(describe)}")
           onProblem(problem)
           reported = Some(problem)
         for device <- readable if !watched.contains(device.getName) && hasKeys(device) && watched.add(device.getName) do
@@ -39,6 +39,12 @@ object Hotkey:
           }
         Thread.sleep(RescanMillis)
     }
+
+  private def describe(problem: HotkeyProblem): String = problem match
+    case HotkeyProblem.NoDevices =>
+      "no input devices found (evdev is Linux-only) - use Translate or `lexmechanic trigger`"
+    case HotkeyProblem.NoPermission =>
+      "input devices with buttons are not readable - run `sudo usermod -aG input $USER` and log in again"
 
   // Skips devices that never report key or button presses, such as the Deck's motion sensors, which stream constantly.
   private def hasKeys(device: File): Boolean =

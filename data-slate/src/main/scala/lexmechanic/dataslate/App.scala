@@ -3,6 +3,9 @@ package lexmechanic.dataslate
 import com.raquo.airstream.web.WebStorageVar
 import com.raquo.laminar.api.L.*
 import io.circe.parser.decode
+import io.circe.syntax.*
+import lexmechanic.dataslate.i18n.I18n.t
+import lexmechanic.dataslate.i18n.{BrowserLocale, I18n, Messages}
 import lexmechanic.noosphere.*
 import org.scalajs.dom
 
@@ -13,12 +16,13 @@ import scala.scalajs.js
 object App:
   private val server = Var(Option.empty[State])
   private val pending = Var(0)
+  private val savedGame = EventBus[String]()
   private val postAnswered = EventBus[Unit]()
-  private val showEnglish = WebStorageVar.localStorage("lexmechanic.english", syncOwner = None).bool(default = true)
+  private val showOriginal = WebStorageVar.localStorage("lexmechanic.original", syncOwner = None).bool(default = true)
 
   private val state: Signal[Option[State]] = server.signal.distinct
 
-  private val hotkey: Signal[Option[HotkeyState]] = state.map(_.map(_.hotkey))
+  private val hotkey: Signal[Option[HotkeyState]] = state.map(_.map(_.hotkey)).distinct
 
   private val status: Signal[ServitorStatus] = state.combineWith(pending.signal).map {
     case (None, _)                                     => ServitorStatus.Offline
@@ -26,6 +30,8 @@ object App:
     case (Some(s), _) if s.error.isDefined             => ServitorStatus.Failed
     case _                                             => ServitorStatus.Ready
   }
+
+  private val offline = state.map(_.isEmpty)
 
   private val actionsDisabled = status.map(s => s == ServitorStatus.Busy || s == ServitorStatus.Offline)
 
@@ -52,14 +58,30 @@ object App:
     result.onComplete(_ => pending.update(_ - 1))
     result
 
+  private def saveBrowserDefaults(state: State): Unit =
+    saveSettings(
+      Settings(
+        language = Option.when(state.language.isEmpty)(BrowserLocale.language),
+        interfaceLanguage = Option.when(state.interfaceLanguage.isEmpty)(I18n.language.now())
+      )
+    )
+
+  private def saveSettings(settings: Settings): Future[Boolean] = post("/settings", settings.asJson.noSpaces)
+
   def main(args: Array[String]): Unit =
     renderOnDomContentLoaded(dom.document.getElementById("app"), view)
 
   private def view = div(
     cls := "shell",
-    cls("show-en") <-- showEnglish.signal,
+    cls("show-original") <-- showOriginal.signal,
     polling --> server.writer,
+    state.changes.collectSome.map(_.interfaceLanguage).collectSome.distinct --> I18n.language.writer,
+    state.changes.collectSome
+      .filter(s => s.language.isEmpty || s.interfaceLanguage.isEmpty)
+      .take(1) --> saveBrowserDefaults,
+    I18n.messages --> { m => dom.document.documentElement.setAttribute("lang", m.lang) },
     header,
+    settings,
     mainView,
     Calibration.overlay(state.map(_.flatMap(_.region))),
     child.maybe <-- state.map(_.flatMap(_.error)).splitOption((_, message) => div(cls := "error", text <-- message))
@@ -71,52 +93,93 @@ object App:
       cls := "status",
       dataAttr("state") <-- status.map(_.toString.toLowerCase),
       span(cls := "dot"),
-      span(text <-- status.map(_.label))
-    ),
-    span(cls := "hotkey-label", "Hotkey"),
-    button(
-      dataAttr("learning") <-- hotkey.map(_.exists(_.learning).toString),
-      disabled <-- hotkey.map(_.forall(_.unavailable.isDefined)),
-      title <-- hotkey.map(_.fold("") { h =>
-        val hint = if h.learning then "Click to cancel" else "Click, then press the mouse button or key to use"
-        h.unavailable.getOrElse(hint)
-      }),
-      text <-- hotkey.map(
-        _.fold("…")(h => if h.learning then "Press a button…" else h.button.fold("None")(EvdevKeys.name))
-      ),
-      onClick(_.sample(hotkey)) --> { h => post(if h.exists(_.learning) then "/hotkey/cancel" else "/hotkey/learn") }
+      span(text <-- t(status)((m, s) => s.label(m)))
     ),
     button(
-      text <-- showEnglish.signal.map(if _ then "Hide original" else "Show original"),
-      onClick --> { _ => showEnglish.update(!_) }
+      text <-- t(showOriginal.signal)((m, show) => if show then m.hideOriginal else m.showOriginal),
+      onClick --> { _ => showOriginal.update(!_) }
     ),
     button(
-      "Calibrate",
+      text <-- t(_.calibrate),
       disabled <-- actionsDisabled,
       onClick --> { _ => post("/calibrate").foreach(ok => if ok then Calibration.open()) }
     ),
     button(
-      "Translate",
+      text <-- t(_.translate),
       disabled <-- actionsDisabled,
       onClick --> { _ => post("/capture") }
+    )
+  )
+
+  private def settings = div(
+    cls := "settings",
+    label(
+      cls := "field game",
+      span(cls := "field-label", text <-- t(_.game)),
+      input(
+        typ := "text",
+        spellCheck := false,
+        placeholder <-- t(_.anyGame),
+        disabled <-- offline,
+        // Polls must not clobber unsaved typing, nor a failed poll blank it; a save re-sets it even when the
+        // server's trimmed value equals the previous one.
+        value <-- EventStream.merge(state.changes.collectSome.map(_.game).distinct, savedGame.events),
+        onChange.mapToValue --> { game =>
+          saveSettings(Settings(game = Some(game))).foreach(_ => server.now().foreach(s => savedGame.emit(s.game)))
+        }
+      )
+    ),
+    label(
+      cls := "field",
+      span(cls := "field-label", text <-- t(_.translateInto)),
+      select(
+        disabled <-- offline,
+        Language.all.map(l => option(value := l.code, text <-- t(_.languageLabel(l)))),
+        controlled(
+          value <-- state.map(_.flatMap(_.language).fold("")(_.code)),
+          onChange.mapToValue --> { code => saveSettings(Settings(language = Language.byCode.get(code))) }
+        )
+      )
+    ),
+    div(
+      cls := "field",
+      span(cls := "field-label", text <-- t(_.hotkey)),
+      button(
+        dataAttr("learning") <-- hotkey.map(_.exists(_.learning).toString),
+        disabled <-- hotkey.map(_.forall(_.unavailable.isDefined)),
+        title <-- t(hotkey) { (m, current) =>
+          current.fold("") { h =>
+            h.unavailable.fold(if h.learning then m.hotkeyCancelHint else m.hotkeyLearnHint)(m.hotkeyUnavailable)
+          }
+        },
+        text <-- t(hotkey) { (m, current) =>
+          current.fold("…")(h => if h.learning then m.pressAButton else h.button.fold(m.noHotkey)(m.keyName))
+        },
+        onClick(_.sample(hotkey)) --> { h => post(if h.exists(_.learning) then "/hotkey/cancel" else "/hotkey/learn") }
+      )
+    ),
+    label(
+      cls := "field",
+      span(cls := "field-label", text <-- t(_.interfaceLanguage)),
+      select(
+        disabled <-- offline,
+        Messages.all.map(m => option(value := m.lang, m.name)),
+        controlled(
+          value <-- I18n.messages.map(_.lang),
+          onChange.mapToValue --> { lang => saveSettings(Settings(interfaceLanguage = Some(lang))) }
+        )
+      )
     )
   )
 
   private def mainView = mainTag(
     child.maybe <-- hotkey
       .map(_.flatMap(_.unavailable))
-      .splitOption((_, reason) => div(cls := "hint", text <-- reason.map(r => s"Hotkey unavailable: $r"))),
-    child(
-      div(
-        cls := "hint",
-        "No region calibrated yet - the whole screen is sent. Use Calibrate to select the dialogue window."
-      )
-    ) <-- state.map(_.exists(_.region.isEmpty)),
-    child(div(cls := "empty", "Press the hotkey while a dialogue is on screen.")) <-- state.map(
-      _.exists(_.history.isEmpty)
-    ),
+      .splitOption((_, problem) => div(cls := "hint", text <-- t(problem)(_.hotkeyUnavailable(_)))),
+    child(div(cls := "hint", text <-- t(_.noRegion))) <-- state.map(_.exists(_.region.isEmpty)),
+    child(div(cls := "empty", text <-- t(_.emptyHistory))) <-- state.map(_.exists(_.history.isEmpty)),
     entries(_.take(1)),
-    child(div(cls := "history-title", "Earlier")) <-- state.map(_.exists(_.history.sizeIs > 1)),
+    child(div(cls := "history-title", text <-- t(_.earlier))) <-- state.map(_.exists(_.history.sizeIs > 1)),
     sectionTag(
       cls := "history",
       entries(_.drop(1))
@@ -128,12 +191,22 @@ object App:
 
   private def renderEntry(entry: Entry) =
     val dialogue = entry.dialogue
+    val translationLang = lang := entry.language.code
+    // The source language is detected by the model and not reported, so it is marked unknown.
+    val originalLang = lang := ""
     articleTag(
       cls := "entry",
       dialogue.speaker.map(div(cls := "speaker", _)),
-      p(cls := "pl", dialogue.text.polish),
-      p(cls := "en", dialogue.text.english),
+      p(cls := "translation", translationLang, dialogue.text.translation),
+      p(cls := "original", originalLang, dialogue.text.original),
       Option.when(dialogue.answers.nonEmpty)(
-        ol(dialogue.answers.map(a => li(div(cls := "pl", a.polish), div(cls := "en", a.english))))
+        ol(
+          dialogue.answers.map(a =>
+            li(
+              div(cls := "translation", translationLang, a.translation),
+              div(cls := "original", originalLang, a.original)
+            )
+          )
+        )
       )
     )

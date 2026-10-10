@@ -44,7 +44,7 @@ Lexmechanics are known for processing information with computer-like speed and a
 
 ## Usage
 
-Lexmechanic is a small daemon. When you press a mouse side button, it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into Polish, and shows the result in a local web page, which it opens on start. Keep that page on the Steam Deck's built-in screen.
+Lexmechanic is a small daemon. When you press a mouse side button, it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into your language, and shows the result in a local web page, which it opens on start. Keep that page on the Steam Deck's built-in screen.
 
 ```sh
 export GEMINI_API_KEY=...       # free key from https://aistudio.google.com/apikey
@@ -67,7 +67,12 @@ The code is split into three sbt modules:
 | `noosphere/` | the Mechanicus data-net its machines talk through | the models and JSON codecs, built for both |
 
 In the UI, use **Calibrate** once to drag a box over the game's dialogue window. To pick the trigger, click the
-**Hotkey** button and press the mouse button or key you want to use.
+**Hotkey** button and press the mouse button or key you want to use. **Game** and **Translate into** set which game you are
+playing and the language to translate into; the source language is detected automatically.
+
+**Interface** picks the UI's own language, separately from the translation language. UI texts live in
+`data-slate/src/main/scala/lexmechanic/dataslate/i18n/`: one object per language implementing `Messages`. To add one,
+copy `English.scala`, translate it and list it in `Messages.all`; the compiler points out anything missing.
 
 Settings are in `~/.config/lexmechanic/config.json`, which is created on first run:
 
@@ -76,7 +81,10 @@ Settings are in `~/.config/lexmechanic/config.json`, which is created on first r
 | `provider` | `gemini` | which API translates; see the table below |
 | `model` | the provider's default | any vision model the provider offers |
 | `apiKeys` | none | API keys by key variable, e.g. `{"GEMINI_API_KEY": "..."}`; a key not listed here is read from the environment |
-| `captain` | `male` | gender of your Rogue Trader, used for Polish grammar |
+| `game` | `Warhammer 40,000: Rogue Trader` | the game being translated, set from the UI; helps the AI use the setting's terminology |
+| `language` | the browser's language | language code to translate into, set from the UI; `en-US` until the UI first opens |
+| `interfaceLanguage` | the browser's language | language of the UI itself, set from the UI; English where there is no UI translation |
+| `captain` | `male` | gender of your player character, for languages with grammatical gender |
 | `port` | `7040` | |
 | `captureCommand` | `spectacle` (Linux) / `screencapture` (macOS) | command as a JSON array of arguments, e.g. `["spectacle", "-b", "-n", "-f", "-o", "{file}"]`; `{file}` becomes the PNG output path |
 | `openCommand` | `xdg-open` (Linux) / `open` (macOS) | opens the UI once the daemon starts; `{url}` becomes its address, `[]` turns it off |

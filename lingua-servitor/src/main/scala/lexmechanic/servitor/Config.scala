@@ -13,13 +13,18 @@ final case class Config(
     provider: Provider = Provider.Gemini,
     model: Option[String] = None,
     apiKeys: Map[String, String] = Map.empty,
+    game: String = "Warhammer 40,000: Rogue Trader",
+    language: Option[Language] = None,
+    interfaceLanguage: Option[String] = None,
     captain: Gender = Gender.Male,
     port: Int = 7040,
     captureCommand: List[String] = Config.defaultCaptureCommand,
     openCommand: List[String] = Config.defaultOpenCommand,
     region: Option[Region] = None,
     hotkey: Option[Int] = Some(EvdevKeys.BtnExtra)
-) derives ConfiguredCodec
+) derives ConfiguredCodec:
+  // Unset until the UI saves the browser's language; translations before that need some target.
+  def targetLanguage: Language = language.getOrElse(Language.fallback)
 
 object Config:
   private val defaultCaptureCommand =

@@ -1,6 +1,7 @@
 package lexmechanic.servitor
 
 import io.circe.Codec
+import lexmechanic.noosphere.nameCodec
 import sttp.ai.claude.config.ClaudeConfig
 import sttp.client4.*
 import sttp.model.Uri

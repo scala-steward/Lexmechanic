@@ -17,13 +17,22 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
   private var busy = false
   private var error = Option.empty[String]
   private var learning = false
-  private var hotkeyUnavailable = Option.empty[String]
+  private var hotkeyUnavailable = Option.empty[HotkeyProblem]
 
   private def state: State = synchronized {
-    State(busy, error, config.region, HotkeyState(config.hotkey, learning, hotkeyUnavailable), history)
+    State(
+      busy,
+      error,
+      config.region,
+      config.game,
+      config.language,
+      config.interfaceLanguage,
+      HotkeyState(config.hotkey, learning, hotkeyUnavailable),
+      history
+    )
   }
 
-  def hotkeyProblem(problem: Option[String]): Unit = synchronized {
+  def hotkeyProblem(problem: Option[HotkeyProblem]): Unit = synchronized {
     hotkeyUnavailable = problem
     if problem.isDefined then learning = false
   }
@@ -61,9 +70,9 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
   private def translateScreen(): Unit =
     val current = synchronized(config)
     val screenshot = Capture.fullScreen(current.captureCommand, translationShot)
-    val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), current.captain)
+    val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), current)
     synchronized {
-      history = (Entry(history.headOption.fold(1)(_.id + 1), dialogue) :: history).take(50)
+      history = (Entry(history.headOption.fold(1)(_.id + 1), dialogue, current.targetLanguage) :: history).take(50)
     }
 
   private def startLearning(): Boolean = synchronized {
@@ -108,6 +117,20 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
             updateConfig(_.copy(region = Some(region)))
             None
           case _ => Some(400 -> "Invalid region")
+      }
+    case ("POST", "/settings") =>
+      act {
+        decode[Settings](request.bodyText) match
+          case Right(settings) =>
+            updateConfig(c =>
+              c.copy(
+                game = settings.game.fold(c.game)(_.trim),
+                language = settings.language.orElse(c.language),
+                interfaceLanguage = settings.interfaceLanguage.orElse(c.interfaceLanguage)
+              )
+            )
+            None
+          case Left(e) => Some(400 -> e.reason)
       }
     case ("POST", "/hotkey/learn")  => currentState(if startLearning() then 200 else 409)
     case ("POST", "/hotkey/cancel") =>

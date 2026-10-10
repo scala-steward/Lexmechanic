@@ -2,6 +2,7 @@ package lexmechanic.dataslate
 
 import com.raquo.laminar.api.L.*
 import io.circe.syntax.*
+import lexmechanic.dataslate.i18n.I18n.t
 import lexmechanic.noosphere.*
 import org.scalajs.dom
 
@@ -46,10 +47,10 @@ object Calibration:
     idAttr := "calibration",
     cls("open") <-- screenshot.signal.map(_.isDefined),
     headerTag(
-      div(cls := "instructions", "Drag over the dialogue window, then save."),
-      button("Cancel", onClick --> { _ => close() }),
+      div(cls := "instructions", text <-- t(_.calibrationInstructions)),
+      button(text <-- t(_.cancel), onClick --> { _ => close() }),
       button(
-        "Save region",
+        text <-- t(_.saveRegion),
         disabled <-- selection.signal.map(!_.exists(b => b.width > 0.005 && b.height > 0.005)),
         onClick --> { _ => save() }
       )
@@ -59,7 +60,7 @@ object Calibration:
       div(
         cls := "frame",
         img(
-          alt := "Full screenshot",
+          alt <-- t(_.fullScreenshot),
           draggable := false,
           src <-- screenshot.signal.map(_.getOrElse("")),
           onMountCallback(ctx => image = Some(ctx.thisNode.ref)),
