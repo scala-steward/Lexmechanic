@@ -1,6 +1,7 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.desktop
 
 import lexmechanic.noosphere.HotkeyProblem
+import lexmechanic.servitor.runtime.{Background, Log}
 
 import java.io.{BufferedInputStream, DataInputStream, File, FileInputStream, IOException}
 import java.nio.file.{Files, Path}

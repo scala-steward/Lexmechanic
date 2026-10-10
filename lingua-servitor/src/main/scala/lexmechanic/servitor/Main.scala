@@ -1,6 +1,11 @@
 package lexmechanic.servitor
 
 import lexmechanic.noosphere.*
+import lexmechanic.servitor.desktop.Hotkey
+import lexmechanic.servitor.http.HttpServer
+import lexmechanic.servitor.image.Png
+import lexmechanic.servitor.runtime.{Log, failureOf, reason}
+import lexmechanic.servitor.translation.{Vox, Xenolinguist}
 import sttp.client4.*
 
 import java.nio.file.Paths
@@ -19,7 +24,7 @@ private val usage =
     case Seq("trigger")         => trigger()
     case Seq("translate", path) =>
       val config = Config.load()
-      println(render(xenolinguist(config).translate(Png.read(Paths.get(path), None), config)))
+      println(render(xenolinguist(config).translate(Png.read(Paths.get(path), None), config.briefing)))
     case _ => fail(usage, exitCode = 2)
 
 private def run(): Unit =

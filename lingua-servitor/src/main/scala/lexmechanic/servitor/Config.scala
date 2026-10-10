@@ -4,6 +4,7 @@ import io.circe.derivation.ConfiguredCodec
 import io.circe.parser.decode
 import io.circe.syntax.*
 import lexmechanic.noosphere.{*, given}
+import lexmechanic.servitor.translation.{Briefing, Gender, Provider}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.scalanative.meta.LinktimeInfo
@@ -25,6 +26,8 @@ final case class Config(
 ) derives ConfiguredCodec:
   // Unset until the UI saves the browser's language; translations before that need some target.
   def targetLanguage: Language = language.getOrElse(Language.fallback)
+
+  def briefing: Briefing = Briefing(game, targetLanguage, captain)
 
 object Config:
   private val defaultCaptureCommand =

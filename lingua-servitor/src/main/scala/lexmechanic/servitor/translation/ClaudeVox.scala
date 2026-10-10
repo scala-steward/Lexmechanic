@@ -1,7 +1,7 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.translation
 
 import lexmechanic.noosphere.*
-import lexmechanic.servitor.Vox.given
+import lexmechanic.servitor.translation.Vox.given
 import sttp.ai.claude.ClaudeSyncClient
 import sttp.ai.claude.models.{ContentBlock, Effort, Message}
 import sttp.ai.claude.requests.MessageRequest

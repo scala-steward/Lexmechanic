@@ -1,7 +1,7 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.translation
 
 import lexmechanic.noosphere.*
-import lexmechanic.servitor.Vox.given
+import lexmechanic.servitor.translation.Vox.given
 import sttp.ai.openai.OpenAISyncClient
 import sttp.ai.openai.requests.completions.chat.ChatRequestBody.ChatBody
 import sttp.ai.openai.requests.completions.chat.ChatRequestBody.ChatCompletionModel.CustomChatCompletionModel

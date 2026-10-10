@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.http
 
 object Resources:
   lazy val web: Map[String, Response] = Map(

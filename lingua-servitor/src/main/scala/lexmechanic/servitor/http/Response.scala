@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.http
 
 import java.nio.charset.StandardCharsets.UTF_8
 

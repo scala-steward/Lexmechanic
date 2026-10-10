@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.desktop
 
 import java.nio.file.{Files, Path}
 import java.util.concurrent.TimeUnit

@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.translation
 
 import lexmechanic.noosphere.*
 import sttp.ai.claude.ClaudeSyncClient

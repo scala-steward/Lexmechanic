@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.image
 
 final case class RgbImage(width: Int, height: Int, pixels: Array[Byte]):
 

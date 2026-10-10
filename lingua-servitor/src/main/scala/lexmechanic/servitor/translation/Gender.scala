@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.translation
 
 import io.circe.Codec
 import lexmechanic.noosphere.nameCodec

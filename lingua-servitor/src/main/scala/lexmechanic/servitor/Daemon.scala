@@ -3,6 +3,11 @@ package lexmechanic.servitor
 import io.circe.parser.decode
 import io.circe.syntax.*
 import lexmechanic.noosphere.*
+import lexmechanic.servitor.desktop.Capture
+import lexmechanic.servitor.http.{Request, Resources, Response}
+import lexmechanic.servitor.image.Png
+import lexmechanic.servitor.runtime.{Background, Log, failureOf, reason}
+import lexmechanic.servitor.translation.Xenolinguist
 
 import java.nio.file.Files
 import scala.util.Try
@@ -70,7 +75,7 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
   private def translateScreen(): Unit =
     val current = synchronized(config)
     val screenshot = Capture.fullScreen(current.captureCommand, translationShot)
-    val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), current)
+    val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), current.briefing)
     synchronized {
       history = (Entry(history.headOption.fold(1)(_.id + 1), dialogue, current.targetLanguage) :: history).take(50)
     }

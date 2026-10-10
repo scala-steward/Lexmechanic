@@ -1,5 +1,6 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.http
 
+import lexmechanic.servitor.runtime.{Background, Log, reason}
 import sttp.model.{StatusCode, StatusText}
 
 import java.io.{BufferedInputStream, ByteArrayOutputStream, InputStream}

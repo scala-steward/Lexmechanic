@@ -1,4 +1,4 @@
-package lexmechanic.servitor
+package lexmechanic.servitor.image
 
 import lexmechanic.noosphere.*
 
