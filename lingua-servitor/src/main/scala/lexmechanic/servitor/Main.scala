@@ -1,11 +1,11 @@
 package lexmechanic.servitor
 
 import lexmechanic.noosphere.*
-import lexmechanic.servitor.desktop.Hotkey
-import lexmechanic.servitor.http.HttpServer
+import lexmechanic.servitor.desktop.ActivationRune
+import lexmechanic.servitor.http.VoxCaster
 import lexmechanic.servitor.image.Png
 import lexmechanic.servitor.runtime.{Log, failureOf, reason}
-import lexmechanic.servitor.translation.{Vox, Xenolinguist}
+import lexmechanic.servitor.translation.{VoxLink, Xenolinguist}
 import sttp.client4.*
 
 import java.nio.file.Paths
@@ -24,15 +24,15 @@ private val usage =
     case Seq("trigger")         => trigger()
     case Seq("translate", path) =>
       val config = Config.load()
-      println(render(xenolinguist(config).translate(Png.read(Paths.get(path), None), config.briefing)))
+      println(render(xenolinguist(config).translate(Png.read(Paths.get(path), None), config.mandate)))
     case _ => fail(usage, exitCode = 2)
 
 private def run(): Unit =
   val config = Config.load()
-  val app = Daemon(xenolinguist(config), config)
+  val servitor = Servitor(xenolinguist(config), config)
   Log.info(s"Config: ${Config.file}")
-  Hotkey.listen(app.onKey, app.hotkeyProblem)
-  HttpServer.serve(config.port, openUi(config.openCommand))(app.route)
+  ActivationRune.listen(servitor.onKey, servitor.hotkeyProblem)
+  VoxCaster.serve(config.port, openUi(config.openCommand))(servitor.route)
 
 private def openUi(command: List[String])(url: String): Unit =
   if command.nonEmpty then
@@ -40,12 +40,12 @@ private def openUi(command: List[String])(url: String): Unit =
       .foreach(e => Log.info(s"Could not open the UI: $e"))
 
 private def xenolinguist(config: Config): Xenolinguist =
-  val provider = config.provider
+  val heretek = config.provider
   val key = config.apiKeys
-    .get(provider.keyVariable)
-    .orElse(sys.env.get(provider.keyVariable))
-    .getOrElse(fail(s"Set ${provider.keyVariable} in apiKeys in ${Config.file}, or as an environment variable"))
-  Xenolinguist(Vox(provider, key, config.model.getOrElse(provider.defaultModel)))
+    .get(heretek.keyVariable)
+    .orElse(sys.env.get(heretek.keyVariable))
+    .getOrElse(fail(s"Set ${heretek.keyVariable} in apiKeys in ${Config.file}, or as an environment variable"))
+  Xenolinguist(VoxLink(heretek, key, config.model.getOrElse(heretek.defaultModel)))
 
 private def trigger(): Unit =
   val port = Config.load().port

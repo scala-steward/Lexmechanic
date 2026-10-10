@@ -1,7 +1,7 @@
 package lexmechanic.servitor.translation
 
 import lexmechanic.noosphere.*
-import lexmechanic.servitor.translation.Vox.given
+import lexmechanic.servitor.translation.VoxLink.given
 import sttp.ai.openai.OpenAISyncClient
 import sttp.ai.openai.requests.completions.chat.ChatRequestBody.ChatBody
 import sttp.ai.openai.requests.completions.chat.ChatRequestBody.ChatCompletionModel.CustomChatCompletionModel
@@ -10,7 +10,7 @@ import sttp.ai.openai.requests.completions.chat.message.Message
 
 import java.util.Base64
 
-final class OpenAiVox(client: OpenAISyncClient, model: String) extends Vox:
+final class OpenAiVoxLink(client: OpenAISyncClient, model: String) extends VoxLink:
   def ask(system: String, png: Array[Byte], instruction: String): Dialogue =
     val image = s"data:image/png;base64,${Base64.getEncoder.encodeToString(png)}"
     val body = ChatBody(

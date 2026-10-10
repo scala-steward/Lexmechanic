@@ -79,6 +79,6 @@ trait Messages:
 object Messages:
   val all: List[Messages] = List(English, Polish, Silesian)
 
-  def forTag(tag: String): Option[Messages] = all.find(_.speaks(tag))
+  def forTag(tag: String): Option[Messages] = Language.forTag(tag).flatMap(l => all.find(_.speaks(l.code)))
 
   def forLanguage(code: String): Messages = forTag(code).getOrElse(English)

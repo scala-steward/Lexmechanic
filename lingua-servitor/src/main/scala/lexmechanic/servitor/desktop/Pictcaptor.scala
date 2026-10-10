@@ -4,8 +4,8 @@ import java.nio.file.{Files, Path}
 import java.util.concurrent.TimeUnit
 import scala.jdk.CollectionConverters.*
 
-object Capture:
-  // A capture tool can hang on a permission prompt; without a limit the daemon would stay busy until restarted.
+object Pictcaptor:
+  // A capture tool can hang on a permission prompt; without a limit the servitor would stay busy until restarted.
   private val TimeoutSeconds = 20L
 
   // Translation and calibration can both capture at once; screenshot tools are not built to run concurrently.

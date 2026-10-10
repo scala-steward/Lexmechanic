@@ -4,14 +4,14 @@ import io.circe.derivation.ConfiguredCodec
 import io.circe.parser.decode
 import io.circe.syntax.*
 import lexmechanic.noosphere.{*, given}
-import lexmechanic.servitor.translation.{Briefing, Gender, Provider}
+import lexmechanic.servitor.translation.{Gender, Heretek, Mandate}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.scalanative.meta.LinktimeInfo
 import scala.util.Properties
 
 final case class Config(
-    provider: Provider = Provider.Gemini,
+    provider: Heretek = Heretek.Gemini,
     model: Option[String] = None,
     apiKeys: Map[String, String] = Map.empty,
     game: String = "Warhammer 40,000: Rogue Trader",
@@ -27,7 +27,7 @@ final case class Config(
   // Unset until the UI saves the browser's language; translations before that need some target.
   def targetLanguage: Language = language.getOrElse(Language.fallback)
 
-  def briefing: Briefing = Briefing(game, targetLanguage, captain)
+  def mandate: Mandate = Mandate(game, targetLanguage, captain)
 
 object Config:
   private val defaultCaptureCommand =

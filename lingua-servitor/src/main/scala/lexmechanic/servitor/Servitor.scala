@@ -3,16 +3,16 @@ package lexmechanic.servitor
 import io.circe.parser.decode
 import io.circe.syntax.*
 import lexmechanic.noosphere.*
-import lexmechanic.servitor.desktop.Capture
+import lexmechanic.servitor.desktop.Pictcaptor
 import lexmechanic.servitor.http.{Request, Resources, Response}
 import lexmechanic.servitor.image.Png
-import lexmechanic.servitor.runtime.{Background, Log, failureOf, reason}
+import lexmechanic.servitor.runtime.{Log, ServoSkull, failureOf, reason}
 import lexmechanic.servitor.translation.Xenolinguist
 
 import java.nio.file.Files
 import scala.util.Try
 
-final class Daemon(xenolinguist: Xenolinguist, initial: Config):
+final class Servitor(xenolinguist: Xenolinguist, initial: Config):
   private val translationShot = Config.cacheDir.resolve("translation.png")
   private val calibrationShot = Config.cacheDir.resolve("calibration.png")
   private val trustedHosts = Set(s"127.0.0.1:${initial.port}", s"localhost:${initial.port}")
@@ -62,7 +62,7 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
       idle
     }
     if started then
-      Background.run("translate") {
+      ServoSkull.run("translate") {
         val failure = failureOf(translateScreen())
         failure.foreach(e => Log.info(s"Error: $e"))
         synchronized {
@@ -74,10 +74,11 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
 
   private def translateScreen(): Unit =
     val current = synchronized(config)
-    val screenshot = Capture.fullScreen(current.captureCommand, translationShot)
-    val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), current.briefing)
+    val screenshot = Pictcaptor.fullScreen(current.captureCommand, translationShot)
+    val mandate = current.mandate
+    val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), mandate)
     synchronized {
-      history = (Entry(history.headOption.fold(1)(_.id + 1), dialogue, current.targetLanguage) :: history).take(50)
+      history = (Entry(history.headOption.fold(1)(_.id + 1), dialogue, mandate.language) :: history).take(50)
     }
 
   private def startLearning(): Boolean = synchronized {
@@ -112,7 +113,7 @@ final class Daemon(xenolinguist: Xenolinguist, initial: Config):
     case ("POST", "/capture")   => currentState(if trigger() then 200 else 409)
     case ("POST", "/calibrate") =>
       act {
-        Capture.fullScreen(synchronized(config).captureCommand, calibrationShot)
+        Pictcaptor.fullScreen(synchronized(config).captureCommand, calibrationShot)
         None
       }
     case ("POST", "/region") =>

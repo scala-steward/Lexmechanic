@@ -1,6 +1,6 @@
 package lexmechanic.servitor.http
 
-import lexmechanic.servitor.runtime.{Background, Log, reason}
+import lexmechanic.servitor.runtime.{Log, ServoSkull, reason}
 import sttp.model.{StatusCode, StatusText}
 
 import java.io.{BufferedInputStream, ByteArrayOutputStream, InputStream}
@@ -8,7 +8,7 @@ import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.nio.charset.StandardCharsets.UTF_8
 
 /** Minimal HTTP/1.1 server for a single local browser; one thread and one request per connection. */
-object HttpServer:
+object VoxCaster:
   private val MaxBody = 1 << 20
   private val MaxHead = 1 << 16
 
@@ -21,7 +21,7 @@ object HttpServer:
     onListening(url)
     while true do
       val socket = server.accept()
-      Background.run("http")(handle(socket, handler))
+      ServoSkull.run("http")(handle(socket, handler))
 
   private def handle(socket: Socket, handler: Request => Response): Unit =
     try

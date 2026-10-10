@@ -1,7 +1,7 @@
 package lexmechanic.servitor.desktop
 
 import lexmechanic.noosphere.HotkeyProblem
-import lexmechanic.servitor.runtime.{Background, Log}
+import lexmechanic.servitor.runtime.{Log, ServoSkull}
 
 import java.io.{BufferedInputStream, DataInputStream, File, FileInputStream, IOException}
 import java.nio.file.{Files, Path}
@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.util.{Try, Using}
 
 /** Listens on Linux evdev devices, so it works under Wayland and regardless of which window has focus. */
-object Hotkey:
+object ActivationRune:
   private val EventSize = 24 // struct input_event on 64-bit Linux
   private val EvKey = 1
   private val Pressed = 1
@@ -19,7 +19,7 @@ object Hotkey:
 
   def listen(onPress: Int => Unit, onProblem: Option[HotkeyProblem] => Unit): Unit =
     val watched = ConcurrentHashMap.newKeySet[String]()
-    Background.run("hotkey-scan") {
+    ServoSkull.run("hotkey-scan") {
       var reported = Option.empty[Option[HotkeyProblem]]
       while true do
         val devices = Option(File("/dev/input").listFiles()).toList.flatten.filter(_.getName.startsWith("event"))
@@ -30,22 +30,16 @@ object Hotkey:
           else if unreadable.exists(hasKeys) then Some(HotkeyProblem.NoPermission)
           else None
         if !reported.contains(problem) then
-          Log.info(s"Hotkey: ${problem.fold("listening")(describe)}")
+          Log.info(s"Hotkey: ${problem.fold("listening")(_.description)}")
           onProblem(problem)
           reported = Some(problem)
         for device <- readable if !watched.contains(device.getName) && hasKeys(device) && watched.add(device.getName) do
-          Background.run(s"hotkey-${device.getName}") {
+          ServoSkull.run(s"hotkey-${device.getName}") {
             try watch(device, onPress)
             finally watched.remove(device.getName)
           }
         Thread.sleep(RescanMillis)
     }
-
-  private def describe(problem: HotkeyProblem): String = problem match
-    case HotkeyProblem.NoDevices =>
-      "no input devices found (evdev is Linux-only) - use Translate or `lexmechanic trigger`"
-    case HotkeyProblem.NoPermission =>
-      "input devices with buttons are not readable - run `sudo usermod -aG input $USER` and log in again"
 
   // Skips devices that never report key or button presses, such as the Deck's motion sensors, which stream constantly.
   private def hasKeys(device: File): Boolean =

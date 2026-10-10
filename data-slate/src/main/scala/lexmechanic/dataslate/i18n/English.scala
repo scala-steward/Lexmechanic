@@ -25,11 +25,7 @@ object English extends Messages:
   val hotkeyCancelHint = "Click to cancel"
   val pressAButton = "Press a button…"
   val noHotkey = "None"
-  def hotkeyUnavailable(problem: HotkeyProblem) = problem match
-    case HotkeyProblem.NoDevices =>
-      "Hotkey unavailable: no input devices found (evdev is Linux-only) - use Translate or `lexmechanic trigger`."
-    case HotkeyProblem.NoPermission =>
-      "Hotkey unavailable: input devices with buttons are not readable - run `sudo usermod -aG input $USER` and log in again."
+  def hotkeyUnavailable(problem: HotkeyProblem) = s"Hotkey unavailable: ${problem.description}."
 
   val noRegion = "No region calibrated yet - the whole screen is sent. Use Calibrate to select the dialogue window."
   val emptyHistory = "Press the hotkey while a dialogue is on screen."
