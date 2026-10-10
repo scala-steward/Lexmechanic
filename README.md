@@ -76,8 +76,3 @@ To build it yourself, see [Build from source](https://stivens.github.io/Lexmecha
 
 Free for any noncommercial use under the [PolyForm Noncommercial License 1.0.0](LICENSE). Selling it, or a fork of it, is not allowed.
 
----
-
-<p align="center">
-  <img src="art/lexmechanic3.jpg" alt="Lexmechanic">
-</p>
