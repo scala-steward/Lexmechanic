@@ -14,19 +14,29 @@ private val usage =
   s"""Usage:
      |  lexmechanic                       start the daemon (hotkey listener + UI server)
      |  lexmechanic trigger               ask the running daemon to translate the screen now
-     |  lexmechanic translate <file.png>  translate a single screenshot and print the result
+     |  lexmechanic translate <file.png> [--lang <code>]
+     |                                    translate a single screenshot and print the result;
+     |                                    --lang (e.g. pl, de, szl) overrides the UI's language
      |
      |Settings, including the AI provider and its API key, can be changed in the UI and live in ${Config.file}""".stripMargin
 
 @main def main(args: String*): Unit =
-  args match
-    case Seq()                  => run()
-    case Seq("trigger")         => trigger()
-    case Seq("translate", path) =>
-      val config = Config.load()
-      val xenolinguist = Xenolinguist(config.voxLink.fold(fail(_), identity))
-      println(render(xenolinguist.translate(Png.read(Paths.get(path), None), config.mandate)))
-    case _ => fail(usage, exitCode = 2)
+  failureOf {
+    args match
+      case Seq()                                  => run()
+      case Seq("trigger")                         => trigger()
+      case Seq("translate", path)                 => translate(path, None)
+      case Seq("translate", path, "--lang", code) => translate(path, Some(code))
+      case Seq("translate", "--lang", code, path) => translate(path, Some(code))
+      case _                                      => fail(usage, exitCode = 2)
+  }.foreach(fail(_))
+
+private def translate(path: String, languageTag: Option[String]): Unit =
+  val language = languageTag.map(tag => Language.forTag(tag).getOrElse(fail(s"Unknown language: $tag")))
+  val config = Config.load()
+  val mandate = config.copy(language = language.orElse(config.language)).mandate
+  val xenolinguist = Xenolinguist(config.voxLink.fold(fail(_), identity))
+  println(render(xenolinguist.translate(Png.read(Paths.get(path), None), mandate)))
 
 private def run(): Unit =
   val config = Config.load()
