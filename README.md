@@ -44,7 +44,9 @@ Lexmechanics are known for processing information with computer-like speed and a
 
 ## Usage
 
-Lexmechanic is a small daemon. When you press the hotkey (a mouse side button by default), it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into your language, and shows the result in a local web page, which it opens on start.
+![How Lexmechanic works](examples/how-it-works.png)
+
+Want to see more? Check out the [example translations](examples/README.md).
 
 ### Installing on Linux
 

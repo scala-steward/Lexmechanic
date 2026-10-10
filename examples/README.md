@@ -1,4 +1,4 @@
-# Examples
+# Translation examples
 
 ## chapter-0-archenemy-1
 
@@ -475,7 +475,7 @@
 
 > Argenta:
 >
-> – Nie było żadnej Teodory, wiedźmo. – Argenta patrzy przed siebie, po czym nabożnie krzyżuje ręce na piersi. – Była tu iluzja, pokusa, plugawa skaza, która próbowała sprowadzić nas na manow Lecz Ulfenkarn dostrzegł jej prawdziwą naturę!
+> "Nie było żadnej Theodory, wiedźmo". Argenta patrzy przed siebie, po czym z nabożeństwem krzyżuje ręce na piersi. "Była tu tylko iluzja, pokusa, plugawa skaza, która próbowała sprowadzić nas na manowce. Ale Ulfenkarn dostrzegł jej prawdziwą naturę!"
 >
 > 1. Kontynuuj
 
