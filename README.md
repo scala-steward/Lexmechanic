@@ -46,7 +46,20 @@ Lexmechanics are known for processing information with computer-like speed and a
 
 Lexmechanic is a small daemon. When you press the hotkey (a mouse side button by default), it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into your language, and shows the result in a local web page, which it opens on start.
 
-### Building and running on Linux
+### Installing on Linux
+
+Download the prebuilt x86_64 binary from the latest release. It needs glibc 2.35 or newer (Ubuntu 22.04, Debian 12,
+Fedora 36, SteamOS 3 and later) and libcurl, which nearly every desktop distro ships.
+
+```bash
+# Installs ~/.local/bin/lexmechanic and its icon; run it again to update.
+curl -L https://github.com/stivens/Lexmechanic/releases/latest/download/lexmechanic-linux-x86_64.tar.gz \
+  | tar -xz -C ~/.local
+```
+
+Then continue with [First run](#first-run).
+
+### Building from source on Linux
 
 Build inside a [distrobox](https://distrobox.it) container: it works the same on any distro, including immutable ones
 like SteamOS, and keeps the build toolchain off the host.
@@ -65,14 +78,8 @@ cd ~/Lexmechanic
 
 # Build inside the container; the binary lands in the shared home directory
 distrobox enter lexbox -- sbt release
-install -Dm755 target/out/native0.5/scala-3.9.0/lingua-servitor/lexmechanic ~/.local/bin/lexmechanic
-
-# Lets the daemon read the hotkey from /dev/input; takes effect after you log in again.
-# On a Steam Deck, set a password with `passwd` first.
-sudo usermod -aG input "$USER"
-
-# Run it
-~/.local/bin/lexmechanic
+install -Dm755 target/lexmechanic ~/.local/bin/lexmechanic
+install -Dm644 art/emblem.svg ~/.local/share/icons/lexmechanic.svg
 ```
 
 To update, run `git pull` and repeat the `sbt release` and `install` lines.
@@ -80,13 +87,22 @@ To update, run `git pull` and repeat the `sbt release` and `install` lines.
 The binary links against the container's glibc. If the host's is older, it fails with `GLIBC_2.xx not found`; create
 the box from an image of your host distro instead and install the same packages with its package manager.
 
+### First run
+
+```bash
+# Lets the daemon read the hotkey from /dev/input; takes effect after you log in again.
+# On a Steam Deck, set a password with `passwd` first.
+sudo usermod -aG input "$USER"
+
+~/.local/bin/lexmechanic
+```
+
 ### Desktop shortcut
 
 A `.desktop` launcher puts Lexmechanic in the app menu, and optionally on the desktop, with the emblem as its icon.
-Run this on the host after the build above:
+Run this on the host after installing:
 
 ```bash
-install -Dm644 ~/Lexmechanic/art/emblem.svg ~/.local/share/icons/lexmechanic.svg
 mkdir -p ~/.cache/lexmechanic ~/.local/share/applications
 
 # EOF is unquoted on purpose: .desktop files don't expand $HOME, so it's filled in here.
