@@ -1,7 +1,7 @@
 # Lexmechanic
 
 <p align="center">
-  <img src="art/lexmechanic3.jpg" alt="Lexmechanic">
+  <img src="art/lexmechanic1.jpg" alt="Lexmechanic">
 </p>
 
 ## Lore
@@ -25,98 +25,114 @@
 
 ### What does a Lexmechanic actually do?
 
-- Data processing and translation
+#### Data processing and translation
 
 A Lexmechanic gathers raw information from cogitators, machine records, reports and other sources, then organises and interprets it into a useful form. This could involve turning thousands of military reports into a coherent operational summary or converting complex technical records into actionable instructions.
 
-- Archiving sacred knowledge
+#### Archiving sacred knowledge
 
 Lexmechanics compile and rationalise information for storage in central cogitator repositories. They help maintain the enormous administrative and technical knowledge systems upon which the Imperium depends. Think of them as a combination of data analyst, archivist and highly specialised machine-assisted clerk.
 
-- Statistical and military analysis
+#### Statistical and military analysis
 
 They process casualty reports, battlefield statistics, planetary assessments, industrial production figures and economic data. Their mathematical abilities can also be applied in the field, helping commanders interpret complex situations and calculate possible outcomes.
 
-- Augmented cognition
+#### Augmented cognition
 
 Lexmechanics are known for processing information with computer-like speed and accuracy. Some undergo the Rite of Clear Thought, a neurological procedure described in the lore that enhances concentration and analytical ability while suppressing emotional distractions. This is not a universal requirement for every Lexmechanic.
 
 
 ## Usage
 
-Lexmechanic is a small daemon. When you press a mouse side button, it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into your language, and shows the result in a local web page, which it opens on start. Keep that page on the Steam Deck's built-in screen.
+Lexmechanic is a small daemon. When you press the hotkey (a mouse side button by default), it takes a screenshot, crops it to the dialogue window, has an AI model translate the dialogue into your language, and shows the result in a local web page, which it opens on start.
 
-```sh
-export GEMINI_API_KEY=...       # free key from https://aistudio.google.com/apikey
-sbt linguaServitor/nativeLink  # sbt 2.x; also builds the UI and embeds it
-bin=target/out/native0.5/scala-3.9.0/lingua-servitor/lexmechanic
-$bin                           # daemon; opens the UI at http://127.0.0.1:7040
-$bin trigger                   # translate now (e.g. from a KDE shortcut)
-$bin translate shot.png        # one-off, prints to the terminal
+### Building and running on Linux
+
+Build inside a [distrobox](https://distrobox.it) container: it works the same on any distro, including immutable ones
+like SteamOS, and keeps the build toolchain off the host.
+
+```bash
+# On the host. Needs distrobox with podman or docker.
+# The container shares your home directory, so whatever it builds there is usable on the host.
+distrobox create --name lexbox --image docker.io/library/archlinux:latest
+
+# Install dependencies
+distrobox enter lexbox -- sudo pacman -Syu --needed --noconfirm clang which curl jdk-openjdk sbt git
+
+# Clone the Lexmechanic source code
+git clone https://github.com/stivens/Lexmechanic.git ~/Lexmechanic
+cd ~/Lexmechanic
+
+# Build inside the container; the binary lands in the shared home directory
+distrobox enter lexbox -- sbt release
+install -Dm755 target/out/native0.5/scala-3.9.0/lingua-servitor/lexmechanic ~/.local/bin/lexmechanic
+
+# Lets the daemon read the hotkey from /dev/input; takes effect after you log in again.
+# On a Steam Deck, set a password with `passwd` first.
+sudo usermod -aG input "$USER"
+
+# Run it
+~/.local/bin/lexmechanic
 ```
 
-For the binary you actually run on the Deck, build with `sbt release`. It writes the same path with an
-optimized build; the debug `linguaServitor/nativeLink` is faster to link but runs the image code noticeably slower.
+To update, run `git pull` and repeat the `sbt release` and `install` lines.
 
-The code is split into three sbt modules:
+The binary links against the container's glibc. If the host's is older, it fails with `GLIBC_2.xx not found`; create
+the box from an image of your host distro instead and install the same packages with its package manager.
 
-| Module | Lore | What it is |
-|---|---|---|
-| `lingua-servitor/` | a mind-wiped worker bound to one task | the Scala Native daemon: hotkey, capture, PNG cropping, AI providers, HTTP server |
-| `data-slate/` | the Imperium's handheld display | the Scala.js + Laminar page shown on the Deck's screen |
-| `noosphere/` | the Mechanicus data-net its machines talk through | the models and JSON codecs, built for both |
+### Desktop shortcut
 
-In the UI, use **Calibrate** once to drag a box over the game's dialogue window. To pick the trigger, click the
-**Hotkey** button and press the mouse button or key you want to use. **Game** and **Translate into** set which game you are
-playing and the language to translate into; the source language is detected automatically.
-**Instructions** opens the part of the Abominable Intelligence prompt you can edit, e.g. to adapt it to another game. The game, the target
-language, the answer format and your character's gender are always added around it.
+A `.desktop` launcher puts Lexmechanic in the app menu, and optionally on the desktop, with the emblem as its icon.
+Run this on the host after the build above:
 
-**Interface** picks the UI's own language, separately from the translation language. UI texts live in
-`data-slate/src/main/scala/lexmechanic/dataslate/i18n/`: one object per language implementing `Messages`. To add one,
-copy `English.scala`, translate it and list it in `Messages.all`; the compiler points out anything missing.
+```bash
+install -Dm644 ~/Lexmechanic/art/emblem.svg ~/.local/share/icons/lexmechanic.svg
+mkdir -p ~/.cache/lexmechanic ~/.local/share/applications
 
-Settings are in `~/.config/lexmechanic/config.json`, which is created on first run:
+# EOF is unquoted on purpose: .desktop files don't expand $HOME, so it's filled in here.
+cat > ~/.local/share/applications/lexmechanic.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=Lexmechanic
+Comment=Translate game dialogue
+Exec=sh -c "exec $HOME/.local/bin/lexmechanic >> $HOME/.cache/lexmechanic/daemon.log 2>&1"
+Icon=$HOME/.local/share/icons/lexmechanic.svg
+Terminal=false
+Categories=Utility;
+Actions=stop;
 
-| Key | Default | |
-|---|---|---|
-| `provider` | `gemini` | which API translates; see the table below |
-| `model` | the provider's default | any vision model the provider offers |
-| `apiKeys` | none | API keys by key variable, e.g. `{"GEMINI_API_KEY": "..."}`; a key not listed here is read from the environment |
-| `game` | `Warhammer 40,000: Rogue Trader` | the game being translated, set from the UI; helps the AI use the setting's terminology |
-| `language` | the browser's language | language code to translate into, set from the UI; `en-US` until the UI first opens |
-| `interfaceLanguage` | the browser's language | language of the UI itself, set from the UI; English where there is no UI translation |
-| `captain` | `male` | gender of your player character, for languages with grammatical gender |
-| `instructions` | built in | game-specific guidance for the Abominable Intelligence, set from the UI; **Restore default** removes it |
-| `port` | `7040` | |
-| `captureCommand` | `spectacle` (Linux) / `screencapture` (macOS) | command as a JSON array of arguments, e.g. `["spectacle", "-b", "-n", "-f", "-o", "{file}"]`; `{file}` becomes the PNG output path |
-| `openCommand` | `xdg-open` (Linux) / `open` (macOS) | opens the UI once the daemon starts; `{url}` becomes its address, `[]` turns it off |
-| `region` | none | set by Calibrate |
-| `hotkey` | `276` | evdev key code, set from the UI; `275` = mouse 4 ("back"), `276` = mouse 5 ("forward") |
+[Desktop Action stop]
+Name=Stop
+Exec=pkill -x lexmechanic
+EOF
 
-Providers:
+# Optional desktop icon
+desktop=$(xdg-user-dir DESKTOP)
+cp ~/.local/share/applications/lexmechanic.desktop "$desktop/" && chmod +x "$desktop/lexmechanic.desktop"
+```
 
-| `provider` | Key variable | Default model | Cost |
-|---|---|---|---|
-| `gemini` | `GEMINI_API_KEY` | `gemini-3.5-flash-lite` | free tier with a daily request limit, shown in AI Studio; free-tier prompts may be used to improve Google's products |
-| `openrouter` | `OPENROUTER_API_KEY` | `google/gemma-4-31b-it:free` | free models; about 50 requests a day, 1,000 after a one-time $10 top-up |
-| `mistral` | `MISTRAL_API_KEY` | `mistral-small-latest` | monthly free credits |
-| `claude` | `ANTHROPIC_API_KEY` | `claude-opus-5-5` | paid |
+- **Start:** click it; the daemon starts in the background and opens the UI through `openCommand`. The first time
+  you click the desktop icon, KDE may ask whether to trust it.
+- **Stop:** right-click the icon or menu entry and choose **Stop**.
+- **Log:** there is no terminal, so the output goes to `~/.cache/lexmechanic/daemon.log`.
+- Clicking it while the daemon is already running does nothing: the second copy finds the port taken, logs that and
+  exits.
 
-### Steam Deck setup
+### Linux setup
 
-- **Hotkey:** the daemon reads mouse buttons from `/dev/input` (evdev), which works under Wayland and while
-  GeForce NOW has focus. Your user needs to be in the `input` group: `sudo usermod -aG input deck`, then log in again.
-  Without that, bind `lexmechanic trigger` to a KDE custom shortcut instead.
-- **Build:** the binary must be built on Linux. Use a distrobox container on the Deck
-  (`distrobox create -i archlinux`, then install `clang`, `which`, `sbt` and `curl` inside it; Scala Native finds `clang` through `which`).
-- **API key:** put it in `apiKeys`. A daemon started by KDE autostart does not see keys exported in your shell profile.
-- **Display:** to open the UI full-screen, set `openCommand` to
-  `["flatpak", "run", "org.mozilla.firefox", "--kiosk", "{url}"]`, then pin the window to the built-in screen with a
-  KDE window rule.
+- **Hotkey:** the daemon reads mouse buttons and keys from `/dev/input` (evdev), which works under Wayland and while
+  another window, such as GeForce NOW, has focus. Without the `input` group, bind `lexmechanic trigger` to a desktop
+  shortcut instead.
+- **Screenshots:** the default `captureCommand` uses KDE's `spectacle`. On other desktops, set it to a command that
+  saves the full screen as a PNG, e.g. `["grim", "{file}"]` on wlroots compositors.
+- **API key:** put it in `apiKeys`. A daemon started by autostart or a desktop launcher does not see keys exported in
+  your shell profile.
+- **Display:** to open the UI full-screen, set `openCommand` to `["firefox", "--kiosk", "{url}"]`, or
+  `["flatpak", "run", "org.mozilla.firefox", "--kiosk", "{url}"]` for the Flatpak (as on SteamOS). To keep it on a
+  second screen, such as the Steam Deck's built-in one, pin the window there with a window rule.
 
 ---
 
 <p align="center">
-  <img src="art/lexmechanic1.jpg" alt="Lexmechanic">
+  <img src="art/lexmechanic3.jpg" alt="Lexmechanic">
 </p>
