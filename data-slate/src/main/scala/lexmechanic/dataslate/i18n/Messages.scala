@@ -19,8 +19,8 @@ trait Messages:
   val statusFailed: String
   val statusReady: String
 
-  val showOriginal: String
-  val hideOriginal: String
+  val original: String
+  val clear: String
   val calibrate: String
   val translate: String
 

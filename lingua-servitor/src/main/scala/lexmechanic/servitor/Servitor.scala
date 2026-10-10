@@ -19,6 +19,8 @@ final class Servitor(xenolinguist: Xenolinguist, initial: Config):
 
   private var config = initial
   private var history = List.empty[Entry]
+  // Not derived from history: ids must survive /clear, as the UI renders each id only once.
+  private var nextEntryId = 1
   private var busy = false
   private var error = Option.empty[String]
   private var learning = false
@@ -78,7 +80,8 @@ final class Servitor(xenolinguist: Xenolinguist, initial: Config):
     val mandate = current.mandate
     val dialogue = xenolinguist.translate(Png.read(screenshot, current.region), mandate)
     synchronized {
-      history = (Entry(history.headOption.fold(1)(_.id + 1), dialogue, mandate.language) :: history).take(50)
+      history = (Entry(nextEntryId, dialogue, mandate.language) :: history).take(50)
+      nextEntryId += 1
     }
 
   private def startLearning(): Boolean = synchronized {
@@ -137,6 +140,11 @@ final class Servitor(xenolinguist: Xenolinguist, initial: Config):
             )
             None
           case Left(e) => Some(400 -> e.reason)
+      }
+    case ("POST", "/clear") =>
+      act {
+        synchronized { history = Nil }
+        None
       }
     case ("POST", "/hotkey/learn")  => currentState(if startLearning() then 200 else 409)
     case ("POST", "/hotkey/cancel") =>

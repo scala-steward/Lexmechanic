@@ -11,8 +11,8 @@ object English extends Messages:
   val statusFailed = "Error"
   val statusReady = "Ready"
 
-  val showOriginal = "Show original"
-  val hideOriginal = "Hide original"
+  val original = "Original"
+  val clear = "Clear"
   val calibrate = "Calibrate"
   val translate = "Translate"
 

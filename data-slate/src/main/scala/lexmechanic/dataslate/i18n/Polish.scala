@@ -12,8 +12,8 @@ object Polish extends Messages:
   val statusFailed = "Błąd"
   val statusReady = "Gotowy"
 
-  val showOriginal = "Pokaż oryginał"
-  val hideOriginal = "Ukryj oryginał"
+  val original = "Oryginał"
+  val clear = "Wyczyść"
   val calibrate = "Kalibruj"
   val translate = "Tłumacz"
 

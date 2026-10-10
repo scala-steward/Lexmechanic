@@ -13,8 +13,8 @@ object Silesian extends Messages:
   val statusFailed = "Feler"
   val statusReady = "Fertich"
 
-  val showOriginal = "Pokŏż ôryginał"
-  val hideOriginal = "Skryj ôryginał"
+  val original = "Ôryginał"
+  val clear = "Wypucuj"
   val calibrate = "Ustŏw"
   val translate = "Przełōż"
 

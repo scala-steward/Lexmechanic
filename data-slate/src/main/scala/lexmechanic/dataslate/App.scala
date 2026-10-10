@@ -96,8 +96,17 @@ object App:
       span(text <-- t(status)((m, s) => s.label(m)))
     ),
     button(
-      text <-- t(showOriginal.signal)((m, show) => if show then m.hideOriginal else m.showOriginal),
+      cls := "switch",
+      role := "switch",
+      aria.checked <-- showOriginal.signal.map(_.toString),
+      span(cls := "track"),
+      span(text <-- t(_.original)),
       onClick --> { _ => showOriginal.update(!_) }
+    ),
+    button(
+      text <-- t(_.clear),
+      disabled <-- state.map(_.forall(_.history.isEmpty)),
+      onClick --> { _ => post("/clear") }
     ),
     button(
       text <-- t(_.calibrate),
