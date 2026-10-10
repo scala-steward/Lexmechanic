@@ -21,3 +21,5 @@ final class OpenAiVoxLink(client: OpenAISyncClient, model: String) extends VoxLi
       )
     )
     client.createChatCompletionAs[Dialogue](body)
+
+  def close(): Unit = client.close()

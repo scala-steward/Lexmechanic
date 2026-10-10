@@ -111,7 +111,7 @@ desktop=$(xdg-user-dir DESKTOP)
 cp ~/.local/share/applications/lexmechanic.desktop "$desktop/" && chmod +x "$desktop/lexmechanic.desktop"
 ```
 
-- **Start:** click it; the daemon starts in the background and opens the UI through `openCommand`. The first time
+- **Start:** click it; the daemon starts in the background and opens the UI. The first time
   you click the desktop icon, KDE may ask whether to trust it.
 - **Stop:** right-click the icon or menu entry and choose **Stop**.
 - **Log:** there is no terminal, so the output goes to `~/.cache/lexmechanic/daemon.log`.
@@ -123,13 +123,15 @@ cp ~/.local/share/applications/lexmechanic.desktop "$desktop/" && chmod +x "$des
 - **Hotkey:** the daemon reads mouse buttons and keys from `/dev/input` (evdev), which works under Wayland and while
   another window, such as GeForce NOW, has focus. Without the `input` group, bind `lexmechanic trigger` to a desktop
   shortcut instead.
-- **Screenshots:** the default `captureCommand` uses KDE's `spectacle`. On other desktops, set it to a command that
-  saves the full screen as a PNG, e.g. `["grim", "{file}"]` on wlroots compositors.
-- **API key:** put it in `apiKeys`. A daemon started by autostart or a desktop launcher does not see keys exported in
-  your shell profile.
-- **Display:** to open the UI full-screen, set `openCommand` to `["firefox", "--kiosk", "{url}"]`, or
-  `["flatpak", "run", "org.mozilla.firefox", "--kiosk", "{url}"]` for the Flatpak (as on SteamOS). To keep it on a
-  second screen, such as the Steam Deck's built-in one, pin the window there with a window rule.
+- **Settings:** the cog icon opens the advanced settings: AI provider, model, API key, player character,
+  screenshot and open commands, and port. They are saved to `~/.config/lexmechanic/config.json`.
+- **Screenshots:** the default screenshot command uses KDE's `spectacle`. On other desktops, use one that saves the
+  full screen as a PNG, e.g. `grim` and `{file}` (one argument per line) on wlroots compositors.
+- **API key:** enter it in the advanced settings. A daemon started by autostart or a desktop launcher does not see keys
+  exported in your shell profile.
+- **Display:** to open the UI full-screen, set **Open the UI with** to `firefox`, `--kiosk`, `{url}`, or `flatpak`,
+  `run`, `org.mozilla.firefox`, `--kiosk`, `{url}` for the Flatpak (as on SteamOS). To keep it on a second screen,
+  such as the Steam Deck's built-in one, pin the window there with a window rule.
 
 ---
 

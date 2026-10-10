@@ -26,3 +26,5 @@ final class ClaudeVoxLink(client: ClaudeSyncClient, model: String) extends VoxLi
       )
       .withEffort(Effort.Low)
     client.createMessageAs[Dialogue](request)
+
+  def close(): Unit = client.close()

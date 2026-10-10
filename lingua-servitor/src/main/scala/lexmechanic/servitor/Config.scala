@@ -4,7 +4,7 @@ import io.circe.derivation.ConfiguredCodec
 import io.circe.parser.decode
 import io.circe.syntax.*
 import lexmechanic.noosphere.{*, given}
-import lexmechanic.servitor.translation.{Gender, Heretek, Mandate}
+import lexmechanic.servitor.translation.{Mandate, VoxLink}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.scalanative.meta.LinktimeInfo
@@ -32,12 +32,21 @@ final case class Config(
 
   def mandate: Mandate = Mandate(game, targetLanguage, captain, activeInstructions)
 
+  def storedKey: Option[String] = apiKeys.get(provider.keyVariable)
+
+  def apiKey: Either[String, String] =
+    storedKey
+      .orElse(sys.env.get(provider.keyVariable))
+      .toRight(s"No $provider API key: set it in the advanced settings, or set ${provider.keyVariable}")
+
+  def voxLink: Either[String, VoxLink] = apiKey.map(VoxLink(provider, _, model.getOrElse(provider.defaultModel)))
+
 object Config:
-  private val defaultCaptureCommand =
+  val defaultCaptureCommand: List[String] =
     if LinktimeInfo.isMac then List("screencapture", "-x", "-t", "png", "{file}")
     else List("spectacle", "--background", "--nonotify", "--fullscreen", "--output", "{file}")
 
-  private val defaultOpenCommand = List(if LinktimeInfo.isMac then "open" else "xdg-open", "{url}")
+  val defaultOpenCommand: List[String] = List(if LinktimeInfo.isMac then "open" else "xdg-open", "{url}")
 
   private def xdgDir(variable: String, fallback: String): Path =
     sys.env.get(variable).map(Paths.get(_)).getOrElse(Paths.get(Properties.userHome, fallback)).resolve("lexmechanic")
