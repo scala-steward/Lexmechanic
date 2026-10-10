@@ -44,7 +44,11 @@ Lexmechanics are known for processing information with computer-like speed and a
 
 ## Usage
 
-![How Lexmechanic works](examples/how-it-works.png)
+![How Lexmechanic works](examples/how-it-works.jpg)
+
+<p align="center">
+  <img src="examples/input/chapter-0-navigator-1.png" alt="Dialogue in the game" width="60%"><img src="examples/en-to-pl/chapter-0-navigator-1-pl-gui.jpg" alt="The same dialogue translated into Polish in Lexmechanic" width="40%">
+</p>
 
 Want to see more? Check out the [example translations](examples/README.md).
 
